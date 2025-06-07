@@ -5,16 +5,47 @@ from django.core.validators import MinLengthValidator
 import jdatetime
 from django.utils import timezone
 
+GENDER_CHOICES = [
+    ('male', 'آقا'),
+    ('female', 'خانم'),
+    ('other', 'نامشخص'),
+]
+
+POLITICAL_ORIENTATION_CHOICES = [
+    ('osolgara', 'اصولگرا'),
+    ('eslahtalab', 'اصلاح طلب'),
+    ('moanedam', 'معاند عام'),
+    ('saltanattalab', 'سلطنت طلب'),
+    ('monafegh', 'منافق'),
+    ('taghribanhamso', 'تقریبا همسو'),
+    ('taghribannahamso', 'تقریبا ناهمسو'),
+]
+
+ORIENTATION_CHOICES = [
+    ('ekhlalgar', 'اخلالگر'),
+    ('khakestari', 'خاکستری'),
+    ('hamso', 'همسو (ارزشی)'),
+]
+
+LOCATION = [
+    ('in', 'داخل'),
+    ('out', 'خارج'),
+    ('other', 'نامشخص'),
+
+]
+
 
 class Category(models.Model):
     name = models.CharField(max_length=20, verbose_name='نام دسته')
     category_image = models.ImageField(upload_to='category_images/', blank=True, null=True, verbose_name='تصویر دسته')
+
     class Meta:
         verbose_name = 'دسته'
         verbose_name_plural = 'دسته ها'
 
     def __str__(self):
         return self.name
+
 
 class Feeling(models.TextChoices):
     HAPPY = 'شاد', 'شاد'
@@ -29,12 +60,13 @@ class Tone(models.TextChoices):
     INFORMAL = 'غیررسمی', 'غیررسمی'
     FRIENDLY = 'دوستانه', 'دوستانه'
     AUTHORITATIVE = 'مقتدرانه', 'مقتدرانه'
+    SARCASM = 'کنایی', 'کنایی'
 
 
 class Ironic(models.TextChoices):
-    YES = 'بله', 'بله'
-    NO = 'خیر', 'خیر'
-    SOMEWHAT = 'تا حدی', 'تا حدی'
+    YES = 'همسو', 'همسو'
+    NO = 'ناهمسو', 'ناهمسو'
+    SOMEWHAT = 'نامشخص', 'نامشخص'
 
 
 class StoryType(models.TextChoices):
@@ -63,13 +95,11 @@ class Topic(models.Model):
         verbose_name = 'موضوع'
         verbose_name_plural = 'موضوعات'
 
-
     def __str__(self):
         return self.name
 
 
 class InstagramPage(models.Model):
-
     # اطلاعات پایه
     page = models.CharField(max_length=100, verbose_name='نام صفحه')
     username = models.CharField(
@@ -83,6 +113,41 @@ class InstagramPage(models.Model):
     topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='موضوع',
                               related_name='instagrampage')
     sub_topic = models.ForeignKey(SubTopic, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='زیرموضوع')
+    gender = models.CharField(
+        max_length=10,
+        choices=GENDER_CHOICES,
+        default='unknown',
+        verbose_name='جنسیت',
+        null=True,
+        blank=True
+    )
+
+    political_orientation = models.CharField(
+        max_length=20,
+        choices=POLITICAL_ORIENTATION_CHOICES,
+        default='unknown',
+        verbose_name='گرایش سیاسی',
+        null=True,
+        blank=True
+    )
+
+    orientation = models.CharField(
+        max_length=20,
+        choices=ORIENTATION_CHOICES,
+        default='unknown',
+        verbose_name='گرایش',
+        null=True,
+        blank=True
+    )
+
+    location = models.CharField(
+        max_length=20,
+        choices=LOCATION,
+        default='unknown',
+        verbose_name='موقعیت',
+        null=True,
+        blank=True
+    )
     # آمارها
     followers_count = models.PositiveIntegerField(default=0, verbose_name='تعداد دنبال‌کنندگان')
     following_count = models.PositiveIntegerField(default=0, verbose_name='تعداد دنبال‌شوندگان')
@@ -117,6 +182,7 @@ class StoryModel(models.Model):
     story_text = models.TextField(max_length=250, verbose_name='متن استوری', null=True, blank=True)
     story_type = models.CharField(max_length=20, choices=StoryType.choices, verbose_name='جنس استوری')
     created_at = jmodels.jDateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد')
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='دسته')
 
     @classmethod
     def get_top_tags_from_queryset(cls, queryset, limit=20):

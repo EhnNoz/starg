@@ -74,7 +74,8 @@ class StoryModelSerializer(serializers.ModelSerializer):
             # 'sub_topic_id',
             'story_text',
             'story_type',
-            'page_name'
+            'page_name',
+            'category_id'
         ]
         read_only_fields = ['page']
 
@@ -121,10 +122,12 @@ class InstagramPageSerializer(serializers.ModelSerializer):
     # jalali_updated_at = serializers.SerializerMethodField()
     # profile_image_url = serializers.SerializerMethodField()
     usage_count = serializers.SerializerMethodField()
+    page_id = serializers.IntegerField(source='id', read_only=True)
+
     class Meta:
         model = InstagramPage
         fields = [
-            'id', 'page', 'username', 'profile_image', 'bio', 'topic', 'sub_topic', 'topic_id', 'sub_topic_id',
+            'id', 'page','page_id','username', 'profile_image', 'bio', 'topic', 'sub_topic', 'topic_id', 'sub_topic_id',
             'followers_count', 'following_count', 'posts_count',
             'average_likes', 'average_comments', 'is_verified',
             'is_active', 'created_at','usage_count','category_id'
@@ -145,6 +148,8 @@ class InstagramPageSerializer(serializers.ModelSerializer):
         if obj.profile_image:
             return self.context['request'].build_absolute_uri(obj.profile_image.url)
         return None
+
+
 
 
 class DayAnalysisSerializer(serializers.ModelSerializer):

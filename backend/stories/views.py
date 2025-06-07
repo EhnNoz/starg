@@ -19,8 +19,14 @@ class TopicViewSet(viewsets.ModelViewSet):
     serializer_class = TopicSerializer
 
     def get_queryset(self):
-        days = self.request.query_params.get('days')
+        days = self.request.query_params.get('days','30')
+        category_id = self.request.query_params.get('category_id')
         queryset = Topic.objects.all()
+
+        if category_id and category_id.isdigit():
+            queryset = queryset.filter(
+                instagrampage__storymodel__category_id=int(category_id)
+            ).distinct()
 
         if days is not None and days.isdigit():
             date_threshold = timezone.now() - timedelta(days=int(days))
@@ -62,13 +68,21 @@ class StoryModelViewSet(viewsets.ModelViewSet):
         if topic_id and topic_id.isdigit():
             queryset = queryset.filter(page__topic_id=int(topic_id))
 
+        # category_id = self.request.query_params.get('category_id')
+        # if category_id and category_id.isdigit():
+        #     queryset = queryset.filter(story__category_id=int(category_id))
+
         # 3. page_id
         page_id = self.request.query_params.get('page_id')
         if page_id and page_id.isdigit():
             queryset = queryset.filter(page_id=int(page_id))
 
+        category_id = self.request.query_params.get('category_id')
+        if category_id and category_id.isdigit():
+            queryset = queryset.filter(category_id=int(category_id))
+
         # 4. days
-        days = self.request.query_params.get('days')
+        days = self.request.query_params.get('days','30')
         if days and days.isdigit():
             date_threshold = timezone.now() - timedelta(days=int(days))
             queryset = queryset.filter(created_at__gte=date_threshold)
@@ -112,7 +126,7 @@ class StateStoryModelViewSet(viewsets.ModelViewSet):
         if page_id:
             queryset = queryset.filter(page__id=page_id)
 
-        days = self.request.query_params.get('days', None)
+        days = self.request.query_params.get('days', '30')
         # queryset = self.filter_queryset(self.get_queryset())
         if days:
             try:
@@ -518,7 +532,7 @@ class InstagramPageViewSet(viewsets.ModelViewSet):
     serializer_class = InstagramPageSerializer
 
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['topic_id','category_id']
+    filterset_fields = ['topic_id', 'category_id', 'id']
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -535,7 +549,7 @@ class DayAnalysisViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        days = self.request.query_params.get('days')
+        days = self.request.query_params.get('days','30')
 
         if days is not None and days.isdigit():
             date_threshold = timezone.now() - timedelta(days=int(days))

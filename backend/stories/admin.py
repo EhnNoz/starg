@@ -5,12 +5,13 @@ from .models import StoryModel, Topic, SubTopic, InstagramPage, Category, DayAna
 
 @admin.register(StoryModel)
 class StoryModelAdmin(admin.ModelAdmin):
-    list_display = ('page', 'created_at', 'feeling', 'tone')
+    list_display = ('page', 'created_at', 'feeling', 'tone','category',)
     list_filter = (
         'created_at',  # فیلتر تاریخ جلالی
         'feeling',
         'tone',
-        'ironic'
+        'ironic',
+        'category',
     )
     search_fields = ('description', 'user__username')
 
@@ -34,7 +35,8 @@ class SubTopicAdmin(admin.ModelAdmin):
 
 @admin.register(InstagramPage)
 class InstagramPageAdmin(admin.ModelAdmin):
-    list_display = ('page', 'username', 'followers_count', 'is_verified', 'is_active', 'topic', 'sub_topic','category')
+    list_display = ('page', 'username', 'followers_count', 'is_verified', 'is_active', 'topic', 'sub_topic',
+                    'gender', 'political_orientation', 'orientation', 'location', 'category')
     list_filter = (
         'is_verified',
         'is_active',
@@ -44,7 +46,8 @@ class InstagramPageAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at',)
     fieldsets = (
         ('اطلاعات پایه', {
-            'fields': ('page', 'username', 'bio', 'profile_image', 'topic', 'sub_topic', 'category')
+            'fields': ('page', 'username', 'bio', 'profile_image', 'topic', 'sub_topic', 'gender',
+                       'political_orientation', 'orientation', 'location', 'category')
         }),
         # ('لینک‌ها', {
         #     'fields': ('website_url', 'instagram_url'),
